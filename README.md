@@ -2,7 +2,8 @@
 
 A modern AI chat application built with Next.js, featuring real-time streaming responses, GitHub OAuth authentication, and a modular AI provider architecture.
 
-![AI Chat Screenshot](https://via.placeholder.com/800x400?text=AI+Chat+App)
+
+![AI Chat Screenshot](https://github.com/user-attachments/assets/380b680b-d598-4cf7-82d8-08eb89752b1d)
 
 ## 🚀 Features
 
