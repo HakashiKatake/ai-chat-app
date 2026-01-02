@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ConversationList } from "./conversation-list";
 import { MessageList } from "./message-list";
 import { ChatInput } from "./chat-input";
+import { SearchBar } from "./search-bar";
 import { UserMenu } from "@/components/auth/user-menu";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Bot } from "lucide-react";
@@ -37,14 +38,17 @@ export function ChatLayout() {
             </div>
             <span className="font-bold text-primary-foreground text-lg">AI Chat</span>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden text-primary-foreground"
-            onClick={() => setSidebarOpen(false)}
-          >
-            <X className="h-5 w-5" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <SearchBar />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden text-primary-foreground h-8 w-8"
+              onClick={() => setSidebarOpen(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         {/* Conversation List */}
@@ -59,20 +63,23 @@ export function ChatLayout() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0">
         {/* Mobile Header */}
-        <header className="flex items-center gap-3 p-4 border-b-2 border-foreground bg-card lg:hidden">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setSidebarOpen(true)}
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 border-2 border-foreground bg-primary flex items-center justify-center">
-              <Bot className="h-4 w-4 text-primary-foreground" />
+        <header className="flex items-center justify-between gap-3 p-4 border-b-2 border-foreground bg-card lg:hidden">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 border-2 border-foreground bg-primary flex items-center justify-center">
+                <Bot className="h-4 w-4 text-primary-foreground" />
+              </div>
+              <span className="font-bold">AI Chat</span>
             </div>
-            <span className="font-bold">AI Chat</span>
           </div>
+          <SearchBar />
         </header>
 
         {/* Messages */}

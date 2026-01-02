@@ -2,22 +2,41 @@
 
 import { useSession } from "next-auth/react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Bot } from "lucide-react";
+import { Bot, Trash2 } from "lucide-react";
 import type { Message } from "@/lib/db/schema";
+import { useMessageStore } from "@/stores/message-store";
 
 interface MessageItemProps {
   message: Message;
+  onDelete?: (id: string) => void;
 }
 
-export function MessageItem({ message }: MessageItemProps) {
+export function MessageItem({ message, onDelete }: MessageItemProps) {
   const { data: session } = useSession();
   const isUser = message.role === "user";
+
+  const handleDelete = async () => {
+    if (!confirm("Delete this message?")) return;
+    
+    try {
+      const response = await fetch(`/api/messages/${message.id}`, {
+        method: "DELETE",
+      });
+      
+      if (response.ok && onDelete) {
+        onDelete(message.id);
+      }
+    } catch (error) {
+      console.error("Failed to delete message:", error);
+    }
+  };
 
   return (
     <div
       className={cn(
-        "flex gap-3 py-4 px-4 md:px-8",
+        "group flex gap-3 py-4 px-4 md:px-8",
         isUser ? "flex-row-reverse" : "flex-row"
       )}
     >
@@ -41,15 +60,27 @@ export function MessageItem({ message }: MessageItemProps) {
       {/* Message Bubble */}
       <div
         className={cn(
-          "max-w-[70%] p-4 border-2 border-foreground shadow-[4px_4px_0px_0px] shadow-foreground",
+          "relative max-w-[70%] p-4 border-2 border-foreground shadow-[4px_4px_0px_0px] shadow-foreground",
           isUser
             ? "bg-accent text-accent-foreground"
             : "bg-card text-card-foreground"
         )}
       >
-        <p className="text-xs font-bold mb-2 uppercase tracking-wide opacity-70">
-          {isUser ? (session?.user?.name || "You") : "AI Assistant"}
-        </p>
+        <div className="flex items-start justify-between gap-2">
+          <p className="text-xs font-bold mb-2 uppercase tracking-wide opacity-70">
+            {isUser ? (session?.user?.name || "You") : "AI Assistant"}
+          </p>
+          {/* Delete button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity -mt-1 -mr-1"
+            onClick={handleDelete}
+            title="Delete message"
+          >
+            <Trash2 className="h-3 w-3" />
+          </Button>
+        </div>
         <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">
           {message.content}
         </div>
@@ -103,7 +134,7 @@ export function ErrorMessage({ error }: ErrorMessageProps) {
           {error}
         </p>
         <p className="text-xs text-muted-foreground mt-2">
-          Try using a different model from the dropdown above.
+          Try using a different model from the dropdown.
         </p>
       </div>
     </div>

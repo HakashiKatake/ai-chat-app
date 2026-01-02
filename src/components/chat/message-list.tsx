@@ -8,7 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Bot, MessageSquare } from "lucide-react";
 
 export function MessageList() {
-  const { messages, isStreaming, streamingContent, isLoading, error } = useMessageStore();
+  const { messages, isStreaming, streamingContent, isLoading, error, setMessages } = useMessageStore();
   const { activeConversationId } = useConversationStore();
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -16,6 +16,11 @@ export function MessageList() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, streamingContent, error]);
+
+  // Handle message deletion
+  const handleDeleteMessage = (messageId: string) => {
+    setMessages(messages.filter((m) => m.id !== messageId));
+  };
 
   if (!activeConversationId) {
     return (
@@ -62,7 +67,11 @@ export function MessageList() {
         ) : (
           <>
             {messages.map((message) => (
-              <MessageItem key={message.id} message={message} />
+              <MessageItem 
+                key={message.id} 
+                message={message} 
+                onDelete={handleDeleteMessage}
+              />
             ))}
             {isStreaming && streamingContent && (
               <StreamingMessage content={streamingContent} />

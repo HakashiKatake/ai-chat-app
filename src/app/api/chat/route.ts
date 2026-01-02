@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { conversations, messages } from "@/lib/db/schema";
 import { getAIProvider, type AIMessage } from "@/lib/ai";
 import { safeEncrypt, safeDecrypt } from "@/lib/encryption";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { eq, and, asc } from "drizzle-orm";
 
 export const runtime = "nodejs";
@@ -14,6 +15,26 @@ export async function POST(request: Request) {
 
         if (!session?.user?.id) {
             return new Response("Unauthorized", { status: 401 });
+        }
+
+        // Rate limiting check
+        const rateLimitResult = checkRateLimit(session.user.id);
+        if (!rateLimitResult.allowed) {
+            return new Response(
+                JSON.stringify({
+                    error: "Rate limit exceeded",
+                    message: `Too many requests. Please wait ${rateLimitResult.resetIn} seconds.`,
+                    resetIn: rateLimitResult.resetIn,
+                }),
+                {
+                    status: 429,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-RateLimit-Remaining": "0",
+                        "X-RateLimit-Reset": String(rateLimitResult.resetIn),
+                    },
+                }
+            );
         }
 
         const { conversationId, content, model } = await request.json();
@@ -123,6 +144,7 @@ export async function POST(request: Request) {
                 "Content-Type": "text/plain; charset=utf-8",
                 "Transfer-Encoding": "chunked",
                 "Cache-Control": "no-cache",
+                "X-RateLimit-Remaining": String(rateLimitResult.remaining),
             },
         });
     } catch (error) {
